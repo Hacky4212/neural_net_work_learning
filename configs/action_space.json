@@ -1,0 +1,19 @@
+{
+  "actions": [
+    {"label": "wait:300", "action": {"type": "wait", "ms": 300}},
+    {"label": "move:w", "action": {"type": "key", "key": "w"}},
+    {"label": "move:a", "action": {"type": "key", "key": "a"}},
+    {"label": "move:s", "action": {"type": "key", "key": "s"}},
+    {"label": "move:d", "action": {"type": "key", "key": "d"}},
+    {"label": "skill:1", "action": {"type": "key", "key": "1"}},
+    {"label": "skill:2", "action": {"type": "key", "key": "2"}},
+    {"label": "skill:3", "action": {"type": "key", "key": "3"}},
+    {"label": "skill:4", "action": {"type": "key", "key": "4"}},
+    {"label": "skill:5", "action": {"type": "key", "key": "5"}},
+    {"label": "potion:F1", "action": {"type": "key", "key": "F1"}},
+    {"label": "potion:F2", "action": {"type": "key", "key": "F2"}},
+    {"label": "potion:F3", "action": {"type": "key", "key": "F3"}},
+    {"label": "potion:F4", "action": {"type": "key", "key": "F4"}},
+    {"label": "potion:F5", "action": {"type": "key", "key": "F5"}}
+  ]
+}
