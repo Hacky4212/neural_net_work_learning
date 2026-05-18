@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ExecutorConfig:
-    click_exe: str = "tools/window_click.exe"
+    click_exe: str = "click.exe"
     key_exe: str = "key.exe"
     dry_run: bool = False
     window_title: str = "MIRMG(1)"
@@ -11,12 +11,12 @@ class ExecutorConfig:
     focus_before_action: bool = True
     require_window: bool = True
     click_coordinates: str = "window"
-    click_backend: str = "window_sendinput"
+    click_backend: str = "screen_click"
     click_area: str = "client"
-    click_reference_width: int = 1280
-    click_reference_height: int = 720
+    click_reference_width: int = 1920
+    click_reference_height: int = 1080
     click_scale_to_window: bool = True
-    prompt_window_resolution: bool = True
+    prompt_window_resolution: bool = False
     require_admin_for_real_actions: bool = True
 
 

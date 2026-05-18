@@ -100,6 +100,25 @@ def get_window_rect(hwnd: int) -> tuple[int, int, int, int] | None:
     return (rect.left, rect.top, rect.right, rect.bottom)
 
 
+def get_client_screen_rect(hwnd: int) -> tuple[int, int, int, int] | None:
+    rect = wintypes.RECT()
+    ok = user32.GetClientRect(wintypes.HWND(hwnd), ctypes.byref(rect))
+    if not ok:
+        return None
+
+    origin = wintypes.POINT(0, 0)
+    ok = user32.ClientToScreen(wintypes.HWND(hwnd), ctypes.byref(origin))
+    if not ok:
+        return None
+
+    width = rect.right - rect.left
+    height = rect.bottom - rect.top
+    if width <= 0 or height <= 0:
+        return None
+
+    return (origin.x, origin.y, origin.x + width, origin.y + height)
+
+
 def is_minimized(hwnd: int) -> bool:
     return bool(user32.IsIconic(wintypes.HWND(hwnd)))
 
@@ -129,10 +148,55 @@ def focus_resolved_window(title: str, fallback_keywords: tuple[str, ...]) -> boo
     return bool(user32.SetForegroundWindow(wintypes.HWND(window.hwnd)))
 
 
-def window_to_screen(title: str, x: int, y: int, fallback_keywords: tuple[str, ...] = ()) -> tuple[int, int] | None:
+def window_to_screen(
+    title: str,
+    x: int,
+    y: int,
+    fallback_keywords: tuple[str, ...] = (),
+    *,
+    area: str = "window",
+    reference_width: int = 0,
+    reference_height: int = 0,
+    scale: bool = False,
+) -> tuple[int, int] | None:
     window = resolve_window(title, fallback_keywords)
     if window is None:
         return None
 
-    left, top, _, _ = window.rect
-    return left + x, top + y
+    bounds = window.rect
+    if area == "client":
+        bounds = get_client_screen_rect(window.hwnd) or bounds
+
+    return resolve_point_in_bounds(x, y, bounds, reference_width, reference_height, scale)
+
+
+def resolve_point_in_bounds(
+    x: int,
+    y: int,
+    bounds: tuple[int, int, int, int],
+    reference_width: int = 0,
+    reference_height: int = 0,
+    scale: bool = False,
+) -> tuple[int, int]:
+    left, top, right, bottom = bounds
+    width = right - left
+    height = bottom - top
+
+    offset_x = x
+    offset_y = y
+    if scale and reference_width > 0 and reference_height > 0 and width > 0 and height > 0:
+        offset_x = round(x * width / reference_width)
+        offset_y = round(y * height / reference_height)
+
+    return (
+        _clamp(left + offset_x, left, right - 1),
+        _clamp(top + offset_y, top, bottom - 1),
+    )
+
+
+def _clamp(value: int, low: int, high: int) -> int:
+    if value < low:
+        return low
+    if value > high:
+        return high
+    return value

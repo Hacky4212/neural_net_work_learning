@@ -17,7 +17,34 @@ class RecordingExecutor(Executor):
         return "MIRMG(1)"
 
 
+class ResolvingExecutor(RecordingExecutor):
+    def _resolve_click_position(self, action: ClickAction) -> tuple[int, int]:
+        return (740, 460)
+
+
 class ExecutorWindowMessageTests(unittest.TestCase):
+    def test_default_config_uses_root_screen_clicker(self) -> None:
+        config = ExecutorConfig()
+
+        self.assertEqual(config.click_exe, "click.exe")
+        self.assertEqual(config.click_backend, "screen_click")
+        self.assertEqual(config.click_reference_width, 1920)
+        self.assertEqual(config.click_reference_height, 1080)
+        self.assertFalse(config.prompt_window_resolution)
+
+    def test_screen_click_backend_uses_resolved_screen_coordinates(self) -> None:
+        config = ExecutorConfig(
+            dry_run=False,
+            require_window=False,
+            click_backend="screen_click",
+            click_exe="click.exe",
+        )
+        executor = ResolvingExecutor(config)
+
+        executor.execute(ClickAction(640, 360))
+
+        self.assertEqual(executor.commands, [["click.exe", "740", "460"]])
+
     def test_real_actions_require_admin_by_default(self) -> None:
         config = ExecutorConfig(
             dry_run=False,

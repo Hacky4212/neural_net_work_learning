@@ -25,24 +25,35 @@ It will not call `click.exe` or `key.exe`.
 
 Copy this folder to the physical machine that runs the game.
 
-Mouse clicks use the Go window clicker:
+Mouse clicks use the root click tool:
+
+```text
+click.exe
+```
+
+The default click backend is `screen_click`.
+Python converts window/client coordinates to screen coordinates first.
+Then it calls `click.exe x y`.
+
+Full-screen game mode is the most accurate path for this backend.
+
+The Go window clicker is still available as an optional backend:
 
 ```text
 tools/window_click.exe
 ```
 
-The default click backend uses `SendInput`.
-It converts window/client coordinates to screen coordinates.
-It moves the real cursor and sends a real left click.
-
-The passive message backend is still available in `game_ai/config.py`:
+Available optional backends in `game_ai/config.py`:
 
 ```python
 click_backend = "window_message"
+click_backend = "window_sendinput"
 ```
 
-That mode does not move the real mouse cursor.
+`window_message` does not move the real mouse cursor.
 Some games ignore it.
+
+`window_sendinput` moves the real cursor and sends a real left click.
 
 If it is missing, build it:
 
@@ -72,12 +83,18 @@ Run the project from administrator PowerShell for real actions.
 The runtime checks this before clicking.
 It does not auto-open a UAC prompt.
 
-Before the run starts, input the game window resolution.
-
-Example:
+The default click reference resolution is:
 
 ```text
-1280x720
+1920x1080
+```
+
+The runtime does not ask for it at startup.
+Change these values in `game_ai/config.py` when needed:
+
+```python
+click_reference_width = 1920
+click_reference_height = 1080
 ```
 
 Click actions use window/client coordinates.

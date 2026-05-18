@@ -54,6 +54,10 @@ class Executor:
             action.x,
             action.y,
             self.config.fallback_window_keywords,
+            area=self.config.click_area,
+            reference_width=self.config.click_reference_width,
+            reference_height=self.config.click_reference_height,
+            scale=self.config.click_scale_to_window,
         )
         if screen_position is None:
             return action.x, action.y

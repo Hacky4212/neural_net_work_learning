@@ -55,7 +55,13 @@ Window and script config:
 game_ai/config.py
 ```
 
-Window click helper:
+Default click helper:
+
+```text
+click.exe
+```
+
+Optional window click helper:
 
 ```text
 tools/window_click.go
@@ -65,11 +71,14 @@ tools/window_click.exe
 Default real-click backend:
 
 ```text
-window_sendinput
+screen_click
 ```
 
-It accepts window/client coordinates.
-It converts them to screen coordinates before clicking.
+It accepts window/client coordinates in Python.
+Python converts them to screen coordinates.
+Then it calls root `click.exe x y`.
+
+`window_message` and `window_sendinput` remain optional `tools/window_click.exe` backends.
 
 ## Training Data Quality
 
@@ -147,14 +156,17 @@ python -m game_ai.train.train_rl
 python -m game_ai.main
 ```
 
-When `dry_run = False`, the runtime asks for the click reference resolution.
+When `dry_run = False`, the runtime uses the configured click reference resolution.
+The default is `1920x1080`.
+The runtime does not ask for it at startup.
 It also requires administrator PowerShell before real actions.
 The runtime does not auto-open a UAC prompt.
 
-Example:
+Change resolution in `game_ai/config.py` when needed:
 
-```text
-1280x720
+```python
+click_reference_width = 1920
+click_reference_height = 1080
 ```
 
 Manual click test:

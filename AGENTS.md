@@ -23,8 +23,12 @@ Keep the dev-machine and game-machine boundary clear:
 Important defaults live in `game_ai/config.py`:
 
 - `ExecutorConfig.dry_run = True`
+- `ExecutorConfig.click_exe = "click.exe"`
 - `ExecutorConfig.window_title = "MIRMG(1)"`
-- `ExecutorConfig.click_backend = "window_sendinput"`
+- `ExecutorConfig.click_backend = "screen_click"`
+- `ExecutorConfig.click_reference_width = 1920`
+- `ExecutorConfig.click_reference_height = 1080`
+- `ExecutorConfig.prompt_window_resolution = False`
 - `ExecutorConfig.require_admin_for_real_actions = True`
 - `ObservationConfig.restore_before_capture = False`
 - `DataConfig.record_missing_window = False`
@@ -38,6 +42,7 @@ Preserve these safety defaults unless the user explicitly asks to change runtime
 - Passive reward code must not click, press keys, move focus, or restore windows.
 - Window focus changes belong only in real execution paths.
 - Dry-run mode should print actions and avoid calling click/key helpers.
+- `screen_click` click mode converts window/client coordinates to screen coordinates, then calls root `click.exe`.
 - `window_message` click mode must not move the real mouse or focus the game window.
 - `window_sendinput` click mode may move the real cursor, but must still target the configured game window only.
 - Real actions should fail fast if the process is not running as administrator.
