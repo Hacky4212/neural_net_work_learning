@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 class ExecutorConfig:
     click_exe: str = "tools/window_click.exe"
     key_exe: str = "key.exe"
-    dry_run: bool = True
+    dry_run: bool = False
     window_title: str = "MIRMG(1)"
     fallback_window_keywords: tuple[str, ...] = ()
     focus_before_action: bool = True

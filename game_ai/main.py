@@ -11,6 +11,7 @@ from game_ai.perception.perceptor import Perceptor
 from game_ai.policy.rule_policy import RulePolicy
 from game_ai.reward.reward_scorer import RewardScorer
 from game_ai.runtime_config import prompt_for_window_resolution
+from game_ai.window.window_utils import focus_resolved_window
 
 
 def run() -> None:
@@ -21,6 +22,11 @@ def run() -> None:
         return
 
     prompt_for_window_resolution(config.executor)
+    if not config.executor.dry_run:
+        focus_resolved_window(
+            config.executor.window_title,
+            config.executor.fallback_window_keywords,
+        )
 
     observer = Observer(config.observation)
     perceptor = Perceptor()
