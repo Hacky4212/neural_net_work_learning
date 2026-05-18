@@ -46,12 +46,14 @@ var (
 	procSetForeground      = user32.NewProc("SetForegroundWindow")
 	procSetCursorPos       = user32.NewProc("SetCursorPos")
 	procMouseEvent         = user32.NewProc("mouse_event")
+	procSendInput          = user32.NewProc("SendInput")
 	procScreenToClient     = user32.NewProc("ScreenToClient")
 	procPostMessageW       = user32.NewProc("PostMessageW")
 )
 
 const (
 	swRestore         = 9
+	inputMouse        = 0
 	mouseLeftDown     = 0x0002
 	mouseLeftUp       = 0x0004
 	wmLButtonDown     = 0x0201
@@ -59,6 +61,20 @@ const (
 	mkLButton         = 0x0001
 	defaultClickDelay = 80 * time.Millisecond
 )
+
+type mouseInput struct {
+	Dx          int32
+	Dy          int32
+	MouseData   uint32
+	DwFlags     uint32
+	Time        uint32
+	DwExtraInfo uintptr
+}
+
+type input struct {
+	Type uint32
+	Mi   mouseInput
+}
 
 func main() {
 	title := flag.String("title", "", "target window title")
@@ -69,7 +85,7 @@ func main() {
 	area := flag.String("area", "client", "client or window")
 	scale := flag.Bool("scale", true, "scale reference coordinates to the current window size")
 	focus := flag.Bool("focus", true, "restore and focus the target window before clicking")
-	mode := flag.String("mode", "cursor", "cursor or message")
+	mode := flag.String("mode", "cursor", "cursor, message, or sendinput")
 	dryRun := flag.Bool("dry-run", false, "print coordinates without clicking")
 	flag.Parse()
 
@@ -94,7 +110,7 @@ func main() {
 		exitf(err.Error())
 	}
 
-	if *focus && *mode == "cursor" {
+	if *focus && usesRealCursor(*mode) {
 		restoreAndFocus(hwnd)
 		time.Sleep(defaultClickDelay)
 	}
@@ -135,6 +151,13 @@ func main() {
 
 	if *mode == "message" {
 		if err := messageClick(hwnd, clientX, clientY); err != nil {
+			exitf(err.Error())
+		}
+		return
+	}
+
+	if *mode == "sendinput" {
+		if err := sendInputClick(screenX, screenY); err != nil {
 			exitf(err.Error())
 		}
 		return
@@ -265,6 +288,25 @@ func cursorClick(x int, y int) {
 	procMouseEvent.Call(mouseLeftUp, 0, 0, 0, 0)
 }
 
+func sendInputClick(x int, y int) error {
+	procSetCursorPos.Call(uintptr(x), uintptr(y))
+	time.Sleep(20 * time.Millisecond)
+
+	inputs := []input{
+		{Type: inputMouse, Mi: mouseInput{DwFlags: mouseLeftDown}},
+		{Type: inputMouse, Mi: mouseInput{DwFlags: mouseLeftUp}},
+	}
+	sent, _, err := procSendInput.Call(
+		uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])),
+		unsafe.Sizeof(inputs[0]),
+	)
+	if sent != uintptr(len(inputs)) {
+		return fmt.Errorf("SendInput sent %d of %d mouse events: %v", sent, len(inputs), err)
+	}
+	return nil
+}
+
 func messageClick(hwnd uintptr, clientX int, clientY int) error {
 	lparam := mouseLParam(clientX, clientY)
 	downOK, _, _ := procPostMessageW.Call(hwnd, wmLButtonDown, mkLButton, lparam)
@@ -294,7 +336,11 @@ func mouseLParam(clientX int, clientY int) uintptr {
 }
 
 func isClickMode(mode string) bool {
-	return mode == "cursor" || mode == "message"
+	return mode == "cursor" || mode == "message" || mode == "sendinput"
+}
+
+func usesRealCursor(mode string) bool {
+	return mode == "cursor" || mode == "sendinput"
 }
 
 func clamp(value int, low int, high int) int {

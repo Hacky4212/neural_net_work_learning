@@ -4,7 +4,7 @@ import time
 
 from game_ai.config import config
 from game_ai.data.recorder import Recorder
-from game_ai.executor.executor import Executor
+from game_ai.executor.executor import Executor, ensure_runtime_permissions
 from game_ai.memory.game_memory import GameMemory
 from game_ai.observation.observer import Observer, RawObservation
 from game_ai.perception.perceptor import Perceptor
@@ -14,6 +14,12 @@ from game_ai.runtime_config import prompt_for_window_resolution
 
 
 def run() -> None:
+    try:
+        ensure_runtime_permissions(config.executor)
+    except RuntimeError as exc:
+        print(exc)
+        return
+
     prompt_for_window_resolution(config.executor)
 
     observer = Observer(config.observation)

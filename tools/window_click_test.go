@@ -12,7 +12,7 @@ func TestMouseLParamPacksClientCoordinates(t *testing.T) {
 }
 
 func TestValidClickModes(t *testing.T) {
-	for _, mode := range []string{"cursor", "message"} {
+	for _, mode := range []string{"cursor", "message", "sendinput"} {
 		if !isClickMode(mode) {
 			t.Fatalf("isClickMode(%q) = false, want true", mode)
 		}

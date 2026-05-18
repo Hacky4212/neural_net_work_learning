@@ -31,17 +31,18 @@ Mouse clicks use the Go window clicker:
 tools/window_click.exe
 ```
 
-The default click backend sends mouse messages to the target window.
-It does not move the real mouse cursor.
-It uses fixed window/client coordinates.
+The default click backend uses `SendInput`.
+It converts window/client coordinates to screen coordinates.
+It moves the real cursor and sends a real left click.
 
-If the game ignores window messages, change this in `game_ai/config.py`:
+The passive message backend is still available in `game_ai/config.py`:
 
 ```python
-click_backend = "window_go"
+click_backend = "window_message"
 ```
 
-That fallback uses the real cursor.
+That mode does not move the real mouse cursor.
+Some games ignore it.
 
 If it is missing, build it:
 
@@ -66,6 +67,10 @@ To execute real actions, change:
 ```python
 dry_run = False
 ```
+
+Run the project from administrator PowerShell for real actions.
+The runtime checks this before clicking.
+It does not auto-open a UAC prompt.
 
 Before the run starts, input the game window resolution.
 

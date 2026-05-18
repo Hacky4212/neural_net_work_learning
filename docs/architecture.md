@@ -62,6 +62,15 @@ tools/window_click.go
 tools/window_click.exe
 ```
 
+Default real-click backend:
+
+```text
+window_sendinput
+```
+
+It accepts window/client coordinates.
+It converts them to screen coordinates before clicking.
+
 ## Training Data Quality
 
 Only target-window steps are recorded by default.
@@ -139,6 +148,8 @@ python -m game_ai.main
 ```
 
 When `dry_run = False`, the runtime asks for the click reference resolution.
+It also requires administrator PowerShell before real actions.
+The runtime does not auto-open a UAC prompt.
 
 Example:
 

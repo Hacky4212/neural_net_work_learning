@@ -11,12 +11,13 @@ class ExecutorConfig:
     focus_before_action: bool = True
     require_window: bool = True
     click_coordinates: str = "window"
-    click_backend: str = "window_message"
+    click_backend: str = "window_sendinput"
     click_area: str = "client"
     click_reference_width: int = 1280
     click_reference_height: int = 720
     click_scale_to_window: bool = True
     prompt_window_resolution: bool = True
+    require_admin_for_real_actions: bool = True
 
 
 @dataclass

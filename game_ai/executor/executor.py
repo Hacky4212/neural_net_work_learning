@@ -2,15 +2,23 @@ from __future__ import annotations
 
 import subprocess
 import time
+from collections.abc import Callable
 
 from game_ai.action.action_schema import Action, ClickAction, KeyAction, WaitAction
 from game_ai.config import ExecutorConfig
+from game_ai.window.admin_utils import is_running_as_admin
 from game_ai.window.window_utils import focus_resolved_window, resolve_window, window_to_screen
 
 
 class Executor:
-    def __init__(self, config: ExecutorConfig) -> None:
+    def __init__(
+        self,
+        config: ExecutorConfig,
+        admin_check: Callable[[], bool] = is_running_as_admin,
+    ) -> None:
         self.config = config
+        self._admin_check = admin_check
+        ensure_runtime_permissions(config, admin_check)
 
     def execute(self, action: Action) -> None:
         if self.config.dry_run:
@@ -53,10 +61,10 @@ class Executor:
         return screen_position
 
     def _execute_click(self, action: ClickAction) -> None:
-        if self.config.click_backend in {"window_go", "window_message"}:
+        if self.config.click_backend in {"window_go", "window_message", "window_sendinput"}:
             window_title = self._resolved_window_title()
             focus = self.config.focus_before_action and self.config.click_backend != "window_message"
-            mode = "message" if self.config.click_backend == "window_message" else "cursor"
+            mode = self._click_mode()
             self._run(self._window_click_command(window_title, action, mode, focus))
             return
 
@@ -90,6 +98,13 @@ class Executor:
             mode,
         ]
 
+    def _click_mode(self) -> str:
+        if self.config.click_backend == "window_message":
+            return "message"
+        if self.config.click_backend == "window_sendinput":
+            return "sendinput"
+        return "cursor"
+
     def _resolved_window_title(self) -> str:
         window = resolve_window(self.config.window_title, self.config.fallback_window_keywords)
         if window is None:
@@ -114,3 +129,19 @@ class Executor:
 
         print(f"[skip] target window not found: {self.config.window_title}")
         return False
+
+
+def ensure_runtime_permissions(
+    config: ExecutorConfig,
+    admin_check: Callable[[], bool] = is_running_as_admin,
+) -> None:
+    if config.dry_run or not config.require_admin_for_real_actions:
+        return
+
+    if admin_check():
+        return
+
+    raise RuntimeError(
+        "administrator rights required for real actions. "
+        "Open PowerShell as administrator and run the project again."
+    )
