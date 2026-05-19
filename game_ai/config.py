@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 @dataclass
 class ExecutorConfig:
     click_exe: str = "click.exe"
+    window_click_exe: str = "tools/window_click.exe"
     key_exe: str = "key.exe"
     dry_run: bool = False
     window_title: str = "MIRMG(1)"

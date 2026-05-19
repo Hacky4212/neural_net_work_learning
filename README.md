@@ -43,6 +43,12 @@ The Go window clicker is still available as an optional backend:
 tools/window_click.exe
 ```
 
+Its config field is:
+
+```python
+window_click_exe = "tools/window_click.exe"
+```
+
 Available optional backends in `game_ai/config.py`:
 
 ```python

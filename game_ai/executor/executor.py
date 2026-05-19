@@ -3,11 +3,15 @@ from __future__ import annotations
 import subprocess
 import time
 from collections.abc import Callable
+from pathlib import Path
 
 from game_ai.action.action_schema import Action, ClickAction, KeyAction, WaitAction
 from game_ai.config import ExecutorConfig
 from game_ai.window.admin_utils import is_running_as_admin
 from game_ai.window.window_utils import focus_resolved_window, resolve_window, window_to_screen
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Executor:
@@ -34,7 +38,7 @@ class Executor:
         if isinstance(action, KeyAction):
             if not self._ensure_target_window():
                 return
-            self._run([self.config.key_exe, action.key])
+            self._run([self._resolve_executable(self.config.key_exe), action.key])
             return
 
         if isinstance(action, WaitAction):
@@ -73,7 +77,7 @@ class Executor:
             return
 
         x, y = self._resolve_click_position(action)
-        self._run([self.config.click_exe, str(x), str(y)])
+        self._run([self._resolve_executable(self.config.click_exe), str(x), str(y)])
 
     def _window_click_command(
         self,
@@ -83,7 +87,7 @@ class Executor:
         focus: bool,
     ) -> list[str]:
         return [
-            self.config.click_exe,
+            self._resolve_executable(self.config.window_click_exe),
             "-title",
             window_title,
             "-x",
@@ -101,6 +105,18 @@ class Executor:
             "-mode",
             mode,
         ]
+
+    @staticmethod
+    def _resolve_executable(executable: str) -> str:
+        path = Path(executable)
+        if path.is_absolute():
+            return str(path)
+
+        repo_path = PROJECT_ROOT / path
+        if repo_path.exists():
+            return str(repo_path)
+
+        return executable
 
     def _click_mode(self) -> str:
         if self.config.click_backend == "window_message":

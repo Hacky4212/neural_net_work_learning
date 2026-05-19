@@ -1,8 +1,12 @@
 import unittest
+from pathlib import Path
 
 from game_ai.action.action_schema import ClickAction
 from game_ai.config import ExecutorConfig
 from game_ai.executor.executor import Executor
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class RecordingExecutor(Executor):
@@ -27,6 +31,7 @@ class ExecutorWindowMessageTests(unittest.TestCase):
         config = ExecutorConfig()
 
         self.assertEqual(config.click_exe, "click.exe")
+        self.assertEqual(config.window_click_exe, "tools/window_click.exe")
         self.assertEqual(config.click_backend, "screen_click")
         self.assertEqual(config.click_reference_width, 1920)
         self.assertEqual(config.click_reference_height, 1080)
@@ -43,7 +48,7 @@ class ExecutorWindowMessageTests(unittest.TestCase):
 
         executor.execute(ClickAction(640, 360))
 
-        self.assertEqual(executor.commands, [["click.exe", "740", "460"]])
+        self.assertEqual(executor.commands, [[str(PROJECT_ROOT / "click.exe"), "740", "460"]])
 
     def test_real_actions_require_admin_by_default(self) -> None:
         config = ExecutorConfig(
@@ -81,6 +86,7 @@ class ExecutorWindowMessageTests(unittest.TestCase):
 
         self.assertEqual(len(executor.commands), 1)
         command = executor.commands[0]
+        self.assertEqual(command[0], str(PROJECT_ROOT / "tools" / "window_click.exe"))
         self.assertIn("-mode", command)
         self.assertIn("message", command)
         self.assertIn("-focus=false", command)
@@ -98,6 +104,7 @@ class ExecutorWindowMessageTests(unittest.TestCase):
 
         self.assertEqual(len(executor.commands), 1)
         command = executor.commands[0]
+        self.assertEqual(command[0], str(PROJECT_ROOT / "tools" / "window_click.exe"))
         self.assertIn("-mode", command)
         self.assertIn("sendinput", command)
         self.assertIn("-focus=true", command)

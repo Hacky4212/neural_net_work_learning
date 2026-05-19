@@ -24,6 +24,7 @@ Important defaults live in `game_ai/config.py`:
 
 - `ExecutorConfig.dry_run = True`
 - `ExecutorConfig.click_exe = "click.exe"`
+- `ExecutorConfig.window_click_exe = "tools/window_click.exe"`
 - `ExecutorConfig.window_title = "MIRMG(1)"`
 - `ExecutorConfig.click_backend = "screen_click"`
 - `ExecutorConfig.click_reference_width = 1920`
